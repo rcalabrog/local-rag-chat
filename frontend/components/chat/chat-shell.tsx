@@ -50,10 +50,11 @@ export function ChatShell() {
   const [error, setError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [uploadMessageType, setUploadMessageType] = useState<"success" | "error" | null>(null);
-  const [uploadedFilename, setUploadedFilename] = useState<string | null>(null);
+  const [activeDocuments, setActiveDocuments] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const pendingTokenRef = useRef("");
   const rafIdRef = useRef<number | null>(null);
+  const uploadedFilename = activeDocuments.length > 0 ? activeDocuments[activeDocuments.length - 1] : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: isStreaming ? "auto" : "smooth" });
@@ -70,7 +71,7 @@ export function ChatShell() {
   const canSend = useMemo(() => input.trim().length > 0 && !isStreaming, [input, isStreaming]);
 
   const onUploadSuccess = (filename: string) => {
-    setUploadedFilename(filename);
+    setActiveDocuments((prev) => (prev.includes(filename) ? prev : [...prev, filename]));
     setUploadMessage("Document uploaded successfully");
     setUploadMessageType("success");
   };
@@ -130,7 +131,7 @@ export function ChatShell() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, active_documents: activeDocuments }),
       });
 
       if (!response.ok || !response.body) {
@@ -237,7 +238,10 @@ export function ChatShell() {
               transition={{ duration: 0.2 }}
               className="mb-2"
             >
-              <UploadedFileBadge filename={uploadedFilename} onRemoveAction={() => setUploadedFilename(null)} />
+              <UploadedFileBadge
+                filename={uploadedFilename}
+                onRemoveAction={() => setActiveDocuments((prev) => prev.slice(0, -1))}
+              />
             </motion.div>
           )}
         </AnimatePresence>

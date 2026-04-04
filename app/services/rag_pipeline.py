@@ -42,6 +42,24 @@ class RAGPipeline:
         retrieved_chunks = self.vector_store.search(query_embedding, top_k=search_k)
         return self._dedupe_chunks(retrieved_chunks)
 
+    def _filter_active_documents(
+        self,
+        chunks: Sequence[RetrievedChunk],
+        active_documents: Sequence[str] | None,
+    ) -> list[RetrievedChunk]:
+        if not active_documents:
+            return list(chunks)
+
+        active = {name.strip() for name in active_documents if name and name.strip()}
+        if not active:
+            return list(chunks)
+
+        filtered = [chunk for chunk in chunks if chunk.filename in active]
+        if filtered:
+            return filtered
+
+        return [chunks[0]] if chunks else []
+
     def build_context(self, chunks: Sequence[RetrievedChunk]) -> str:
         if not chunks:
             return "[No relevant context found]"
@@ -58,25 +76,38 @@ class RAGPipeline:
             "Answer:"
         )
 
-    def prepare(self, question: str) -> tuple[str, list[dict[str, Any]]]:
+    def prepare(
+        self,
+        question: str,
+        active_documents: Sequence[str] | None = None,
+    ) -> tuple[str, list[dict[str, Any]]]:
         retrieved_chunks = self.retrieve(question)
-        prompt = self.build_prompt(question, retrieved_chunks)
+        filtered_chunks = self._filter_active_documents(retrieved_chunks, active_documents)
+        prompt = self.build_prompt(question, filtered_chunks)
         sources = [
             {
                 "text": chunk.text,
                 "filename": chunk.filename,
                 "chunk_id": chunk.chunk_id,
             }
-            for chunk in retrieved_chunks
+            for chunk in filtered_chunks
         ]
         return prompt, sources
 
-    def stream_answer(self, question: str) -> tuple[Iterator[str], list[dict[str, Any]]]:
-        prompt, sources = self.prepare(question)
+    def stream_answer(
+        self,
+        question: str,
+        active_documents: Sequence[str] | None = None,
+    ) -> tuple[Iterator[str], list[dict[str, Any]]]:
+        prompt, sources = self.prepare(question, active_documents=active_documents)
         stream = self.llm_provider.generate_stream(prompt)
         return stream, sources
 
-    def answer(self, question: str) -> tuple[str, list[dict[str, Any]]]:
-        prompt, sources = self.prepare(question)
+    def answer(
+        self,
+        question: str,
+        active_documents: Sequence[str] | None = None,
+    ) -> tuple[str, list[dict[str, Any]]]:
+        prompt, sources = self.prepare(question, active_documents=active_documents)
         answer = self.llm_provider.generate(prompt)
         return answer, sources

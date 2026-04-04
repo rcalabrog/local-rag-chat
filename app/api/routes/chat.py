@@ -18,7 +18,10 @@ def chat_stream(request_data: ChatRequest, request: Request) -> StreamingRespons
 
     def event_stream() -> Iterator[str]:
         try:
-            token_stream, sources = rag_pipeline.stream_answer(request_data.question)
+            token_stream, sources = rag_pipeline.stream_answer(
+                request_data.question,
+                active_documents=request_data.active_documents,
+            )
             for token in token_stream:
                 payload = {"type": "token", "content": token}
                 yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
@@ -45,7 +48,10 @@ def chat_with_sources(request_data: ChatRequest, request: Request) -> ChatRespon
     rag_pipeline = request.app.state.rag_pipeline
 
     try:
-        answer, sources = rag_pipeline.answer(request_data.question)
+        answer, sources = rag_pipeline.answer(
+            request_data.question,
+            active_documents=request_data.active_documents,
+        )
     except Exception as exc:
         logger.exception("Chat pipeline execution failed")
         raise HTTPException(

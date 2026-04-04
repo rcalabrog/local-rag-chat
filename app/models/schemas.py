@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1)
+    active_documents: list[str] = Field(default_factory=list)
 
 
 class SourceItem(BaseModel):
