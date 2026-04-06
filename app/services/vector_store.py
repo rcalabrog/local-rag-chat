@@ -132,6 +132,24 @@ class VectorStore:
         payload = [asdict(record) for record in self._records]
         self.metadata_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    def clear(self) -> None:
+        with self._lock:
+            self._index = None
+            self._records = []
+            removed_paths: list[str] = []
+
+            for path in (self.index_path, self.metadata_path):
+                try:
+                    path.unlink()
+                    removed_paths.append(str(path))
+                except FileNotFoundError:
+                    continue
+
+            if removed_paths:
+                logger.info("Deleted vector store files: %s", ", ".join(removed_paths))
+            else:
+                logger.info("Vector store files already absent; reset in-memory state only.")
+
     def add_chunks(self, chunks: Sequence[ChunkInput], embeddings: np.ndarray) -> int:
         if not chunks:
             return 0

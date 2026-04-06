@@ -27,3 +27,7 @@ class UploadResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
+
+
+class ClearDocumentsResponse(BaseModel):
+    message: str

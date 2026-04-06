@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
 
-from app.models.schemas import UploadResponse
+from app.models.schemas import ClearDocumentsResponse, UploadResponse
 from app.services.vector_store import ChunkInput
 from app.utils.chunking import chunk_text
 from app.utils.document_loader import extract_text_from_bytes
@@ -77,3 +77,15 @@ async def upload_document(
         total_chunks=vector_store.size,
         already_indexed=False,
     )
+
+
+@router.delete("/documents", response_model=ClearDocumentsResponse)
+def clear_documents(request: Request) -> ClearDocumentsResponse:
+    vector_store = request.app.state.vector_store
+    document_registry = request.app.state.document_registry
+
+    vector_store.clear()
+    document_registry.clear()
+    logger.info("All indexed documents were cleared.")
+
+    return ClearDocumentsResponse(message="All documents cleared")

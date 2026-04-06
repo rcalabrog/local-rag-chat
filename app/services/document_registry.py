@@ -51,3 +51,9 @@ class DocumentRegistry:
             payload = {"documents": [asdict(record) for record in self._documents]}
             self.registry_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
             return True
+
+    def clear(self) -> None:
+        with self._lock:
+            self._documents = []
+            payload = {"documents": []}
+            self.registry_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

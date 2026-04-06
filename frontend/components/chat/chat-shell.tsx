@@ -10,6 +10,7 @@ import { SourcesPanel } from "@/components/chat/sources-panel";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { FileUpload } from "@/components/FileUpload";
 import { UploadedFileBadge } from "@/components/UploadedFileBadge";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -51,6 +52,9 @@ export function ChatShell() {
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [uploadMessageType, setUploadMessageType] = useState<"success" | "error" | null>(null);
   const [activeDocuments, setActiveDocuments] = useState<string[]>([]);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearingData, setIsClearingData] = useState(false);
+  const [clearDataMessage, setClearDataMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const pendingTokenRef = useRef("");
   const rafIdRef = useRef<number | null>(null);
@@ -74,12 +78,46 @@ export function ChatShell() {
     setActiveDocuments((prev) => (prev.includes(filename) ? prev : [...prev, filename]));
     setUploadMessage("Document uploaded successfully");
     setUploadMessageType("success");
+    setClearDataMessage(null);
   };
 
   const onUploadError = (message: string) => {
     setUploadMessage(message);
     setUploadMessageType("error");
   };
+
+  const clearChatState = useCallback(() => {
+    setMessages(initialMessages);
+    setInput("");
+    setSources([]);
+    setError(null);
+    setUploadMessage(null);
+    setUploadMessageType(null);
+    setActiveDocuments([]);
+  }, []);
+
+  const handleClearData = useCallback(async () => {
+    setIsClearingData(true);
+    setClearDataMessage(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/documents`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to clear documents");
+      }
+
+      clearChatState();
+      setClearDataMessage("All documents cleared");
+    } catch {
+      setClearDataMessage("Failed to clear documents");
+    } finally {
+      setIsClearingData(false);
+      setIsClearModalOpen(false);
+    }
+  }, [clearChatState]);
 
   const flushAssistantTokens = useCallback(() => {
     rafIdRef.current = null;
@@ -283,6 +321,43 @@ export function ChatShell() {
         </div>
         {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
       </form>
+
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+        {clearDataMessage && (
+          <p
+            className={`rounded-lg px-3 py-1.5 text-xs ${
+              clearDataMessage === "All documents cleared"
+                ? "bg-emerald-500/20 text-emerald-300"
+                : "bg-red-500/20 text-red-300"
+            }`}
+          >
+            {clearDataMessage}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => setIsClearModalOpen(true)}
+          disabled={isClearingData}
+          className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isClearingData ? "Clearing..." : "Clear Data"}
+        </button>
+      </div>
+
+      <ConfirmModal
+        isOpen={isClearModalOpen}
+        title="Clear all indexed data"
+        message="Are you sure you want to delete the uploaded documents?"
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        isLoading={isClearingData}
+        onConfirmAction={handleClearData}
+        onCancelAction={() => {
+          if (!isClearingData) {
+            setIsClearModalOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }
