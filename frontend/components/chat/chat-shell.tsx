@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 
 import type { ChatMessage, ChatStreamEvent, Source } from "@/lib/types";
+import { ACTIVE_LLM } from "@/lib/llm-config";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { SourcesPanel } from "@/components/chat/sources-panel";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
@@ -246,8 +248,28 @@ export function ChatShell() {
         transition={{ duration: 0.25 }}
         className="mb-4 rounded-2xl border border-white/10 bg-panel/80 p-4 shadow-panel backdrop-blur"
       >
-        <h1 className="text-lg font-semibold tracking-tight">Local RAG Chat</h1>
-        <p className="text-xs text-muted">Backend: {API_BASE_URL}</p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold tracking-tight">Local RAG Chat</h1>
+            <p className="truncate text-xs text-muted">{ACTIVE_LLM.label}</p>
+          </div>
+          <a
+            href="https://github.com/rcalabrog/local-rag-chat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group shrink-0 rounded-xl border border-white/10 bg-white/5 p-2 transition hover:border-white/30 hover:bg-white/10"
+            aria-label="Open project GitHub repository"
+          >
+            <Image
+              src="/images/rc_logo.png"
+              alt="RC logo"
+              width={110}
+              height={28}
+              priority
+              className="h-7 w-auto object-contain opacity-90 transition group-hover:opacity-100 md:h-8"
+            />
+          </a>
+        </div>
       </motion.header>
 
       <div className="flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-panel/70 p-4 shadow-panel backdrop-blur">

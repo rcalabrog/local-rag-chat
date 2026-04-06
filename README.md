@@ -313,6 +313,5 @@ For chat:
 
 ## Notes
 
-- The frontend accepts `.docx` in the file picker, but backend extraction currently supports PDF + text-like formats only.
 - `data/vector_store/*` should be persisted across runs if you want retrieval memory to survive restarts.
 - Ollama must be reachable at configured `OLLAMA_BASE_URL`.
