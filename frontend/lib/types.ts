@@ -3,6 +3,8 @@ export type ChatRole = "user" | "assistant";
 export type ChatMessage = {
   role: ChatRole;
   content: string;
+  timestamp?: string;
+  sources?: Source[];
 };
 
 export type Source = {
@@ -16,3 +18,14 @@ export type ChatStreamEvent =
   | { type: "sources"; sources: Source[] }
   | { type: "done" }
   | { type: "error"; message: string };
+
+export type ChatSessionSummary = {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChatSession = ChatSessionSummary & {
+  messages: ChatMessage[];
+};

@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     vector_index_path: Path = Path("data/vector_store/faiss.index")
     vector_metadata_path: Path = Path("data/vector_store/faiss_meta.json")
     documents_registry_path: Path = Path("data/vector_store/documents.json")
+    chat_sessions_path: Path = Path("data/chat_sessions/sessions.json")
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.1:8b"

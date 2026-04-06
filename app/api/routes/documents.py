@@ -83,9 +83,11 @@ async def upload_document(
 def clear_documents(request: Request) -> ClearDocumentsResponse:
     vector_store = request.app.state.vector_store
     document_registry = request.app.state.document_registry
+    chat_sessions = request.app.state.chat_sessions
 
     vector_store.clear()
     document_registry.clear()
-    logger.info("All indexed documents were cleared.")
+    chat_sessions.clear()
+    logger.info("All indexed documents and chat sessions were cleared.")
 
     return ClearDocumentsResponse(message="All documents cleared")
