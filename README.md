@@ -4,13 +4,13 @@
 
 Production-style local Retrieval-Augmented Generation (RAG) chat system with:
 
+- Local LLM execution (Ollama)
+- Multi-document RAG
+- Streaming responses
+- Collapsible metadata-rich sources
 - Chat sessions with sidebar navigation
 - Clear Data button (FAISS reset)
-- `.docx` document ingestion support
-- Collapsible metadata-rich sources
-- Streaming responses
-- Multi-document RAG
-- Local LLM execution (Ollama)
+- `.pdf`, `.docx`, `.txt`, `.md` document ingestion support
 
 ## Features
 
