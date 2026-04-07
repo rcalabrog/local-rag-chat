@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     retrieval_top_k: int = Field(default=3, ge=1)
 
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    pdf_ocr_min_text_length: int = Field(default=120, ge=0)
+    ocr_languages: list[str] = Field(default_factory=lambda: ["en"])
+    ocr_gpu: bool = False
 
     vector_index_path: Path = Path("data/vector_store/faiss.index")
     vector_metadata_path: Path = Path("data/vector_store/faiss_meta.json")

@@ -507,9 +507,13 @@ export function ChatShell() {
             activeSessionId={activeSessionId}
             disabled={sidebarDisabled}
             isLoading={isSessionsLoading}
+            clearDataMessage={clearDataMessage}
+            isClearingData={isClearingData}
+            isClearDataDisabled={isClearingData || isStreaming}
             onCreateSessionAction={handleCreateSessionAction}
             onSelectSessionAction={handleSelectSessionAction}
             onDeleteSessionAction={handleDeleteSessionAction}
+            onClearDataAction={() => setIsClearModalOpen(true)}
           />
         </div>
 
@@ -616,28 +620,6 @@ export function ChatShell() {
             {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
           </form>
         </div>
-      </div>
-
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
-        {clearDataMessage && (
-          <p
-            className={`rounded-lg px-3 py-1.5 text-xs ${
-              clearDataMessage === "All documents cleared"
-                ? "bg-emerald-500/20 text-emerald-300"
-                : "bg-red-500/20 text-red-300"
-            }`}
-          >
-            {clearDataMessage}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={() => setIsClearModalOpen(true)}
-          disabled={isClearingData || isStreaming}
-          className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isClearingData ? "Clearing..." : "Clear Data"}
-        </button>
       </div>
 
       <ConfirmModal
