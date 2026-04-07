@@ -1,6 +1,6 @@
 # Local RAG Chat
 
-![Local RAG Chat Preview](frontend/public/images/localragchat_preview.JPG)
+![Local RAG Chat Preview](frontend/public/images/localragchat_loop.gif)
 
 Production-style local Retrieval-Augmented Generation (RAG) chat system with:
 
